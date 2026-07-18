@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>false</SelfContained>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <AssemblyName>WindowsLocker</AssemblyName>
+    <RootNamespace>WindowsLocker</RootNamespace>
+    <!-- Service host: no window, ships as a plain exe -->
+    <UseAppHost>true</UseAppHost>
+  </PropertyGroup>
+
+  <!-- Only compile our source folder -->
+  <ItemGroup>
+    <Compile Remove="publish/**/*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.*" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="10.0.*" />
+    <PackageReference Include="System.Management" Version="10.0.*" />
+    <PackageReference Include="System.Diagnostics.EventLog" Version="10.0.*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="WindowsLocker.ini" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

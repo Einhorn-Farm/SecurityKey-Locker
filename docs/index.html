@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YubiKey Locker — lock Windows when your key is removed</title>
+  <meta name="description" content="A tiny Windows service that locks your workstation the instant your YubiKey is unplugged. Install once, runs in the background, no runtime required." />
+  <meta property="og:title" content="YubiKey Locker" />
+  <meta property="og:description" content="Pull your YubiKey, and Windows locks. Install once, runs in the background." />
+  <meta property="og:type" content="website" />
+  <style>
+    :root {
+      --bg: #0d1117;
+      --bg-soft: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --muted: #9198a1;
+      --accent: #58a6ff;
+      --accent-2: #3fb950;
+      --radius: 14px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .wrap { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+
+    header {
+      border-bottom: 1px solid var(--border);
+      background: rgba(13,17,23,0.8);
+      backdrop-filter: blur(8px);
+      position: sticky; top: 0; z-index: 10;
+    }
+    .nav { display: flex; align-items: center; justify-content: space-between; height: 60px; }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; }
+    .brand .mark { font-size: 22px; }
+    .nav-links { display: flex; gap: 22px; }
+    .nav-links a { color: var(--muted); font-size: 15px; }
+    .nav-links a:hover { color: var(--text); text-decoration: none; }
+
+    .hero { text-align: center; padding: 96px 0 72px; }
+    .hero .mark { font-size: 64px; display: block; margin-bottom: 20px; }
+    .hero h1 { font-size: 52px; line-height: 1.1; letter-spacing: -0.02em; }
+    .hero .tagline { font-size: 21px; color: var(--muted); margin: 20px auto 0; max-width: 620px; }
+    .cta { margin-top: 36px; display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 12px 22px; border-radius: 10px; font-weight: 600; font-size: 15px;
+      border: 1px solid var(--border);
+    }
+    .btn-primary { background: var(--accent); color: #0d1117; border-color: var(--accent); }
+    .btn-primary:hover { background: #79b8ff; text-decoration: none; }
+    .btn-ghost { color: var(--text); background: var(--bg-soft); }
+    .btn-ghost:hover { border-color: var(--accent); text-decoration: none; }
+
+    section { padding: 56px 0; border-top: 1px solid var(--border); }
+    section h2 { font-size: 28px; letter-spacing: -0.01em; margin-bottom: 8px; }
+    section .lead { color: var(--muted); margin-bottom: 32px; max-width: 680px; }
+
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .card {
+      background: var(--bg-soft); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 22px;
+    }
+    .card .ico { font-size: 24px; margin-bottom: 10px; }
+    .card h3 { font-size: 17px; margin-bottom: 6px; }
+    .card p { color: var(--muted); font-size: 14.5px; }
+
+    .steps { counter-reset: step; display: grid; gap: 14px; }
+    .step {
+      display: flex; gap: 16px; align-items: flex-start;
+      background: var(--bg-soft); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 18px 20px;
+    }
+    .step::before {
+      counter-increment: step; content: counter(step);
+      flex: 0 0 30px; height: 30px; border-radius: 50%;
+      background: var(--accent); color: #0d1117; font-weight: 700;
+      display: grid; place-items: center; font-size: 15px;
+    }
+    .step h3 { font-size: 16px; margin-bottom: 2px; }
+    .step p { color: var(--muted); font-size: 14.5px; }
+
+    pre {
+      background: #010409; border: 1px solid var(--border);
+      border-radius: 10px; padding: 16px 18px; overflow-x: auto;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 14px; color: #e6edf3; margin-top: 14px;
+    }
+    .code-comment { color: var(--muted); }
+
+    .how p { color: var(--muted); margin-bottom: 14px; }
+    .how ol { color: var(--muted); padding-left: 22px; }
+    .how li { margin-bottom: 8px; }
+    .how code, .card code, .step code {
+      background: #010409; border: 1px solid var(--border);
+      border-radius: 6px; padding: 1px 6px; font-size: 13px;
+      font-family: "SFMono-Regular", Consolas, monospace; color: var(--text);
+    }
+
+    footer { border-top: 1px solid var(--border); padding: 32px 0; color: var(--muted); font-size: 14px; }
+    .footer-row { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+
+    @media (max-width: 720px) {
+      .hero h1 { font-size: 38px; }
+      .grid { grid-template-columns: 1fr; }
+      .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap nav">
+      <div class="brand"><span class="mark">🔐</span> YubiKey Locker</div>
+      <nav class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#install">Install</a>
+        <a href="#how">How it works</a>
+        <a href="https://github.com/SpechtLabs/YubiKey-Locker">GitHub</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="wrap">
+      <section class="hero" style="border-top:none">
+        <span class="mark">🔐</span>
+        <h1>Pull your key. Windows locks.</h1>
+        <p class="tagline">
+          A tiny Windows service that locks your workstation the instant your
+          YubiKey is unplugged. No hotkey, no habit to remember.
+        </p>
+        <div class="cta">
+          <a class="btn btn-primary" href="https://github.com/SpechtLabs/YubiKey-Locker/releases/latest">⬇ Download for Windows</a>
+          <a class="btn btn-ghost" href="https://github.com/SpechtLabs/YubiKey-Locker">View on GitHub</a>
+        </div>
+      </section>
+
+      <section id="features">
+        <h2>Why it exists</h2>
+        <p class="lead">
+          Lock discipline fails the one time it matters. Idle timeouts leave a
+          window open. Tie the lock to something you already do — taking your key with you.
+        </p>
+        <div class="grid">
+          <div class="card">
+            <div class="ico">⚡</div>
+            <h3>Instant lock</h3>
+            <p>Reacts to USB removal events in real time. The screen is locked before you've stood up.</p>
+          </div>
+          <div class="card">
+            <div class="ico">🫥</div>
+            <h3>Runs in the background</h3>
+            <p>An auto-start Windows service. Installs once, then never prompts for admin again.</p>
+          </div>
+          <div class="card">
+            <div class="ico">📦</div>
+            <h3>No runtime needed</h3>
+            <p>Ships as a single self-contained binary. Nothing to install on the target machine.</p>
+          </div>
+          <div class="card">
+            <div class="ico">🔧</div>
+            <h3>Any security key</h3>
+            <p>Defaults to YubiKey (<code>VID 1050</code>), but any USB token works by vendor id.</p>
+          </div>
+          <div class="card">
+            <div class="ico">🛡️</div>
+            <h3>Fail-safe</h3>
+            <p>If a session can't be resolved it logs and does nothing — it never misfires or opens up.</p>
+          </div>
+          <div class="card">
+            <div class="ico">📝</div>
+            <h3>Observable</h3>
+            <p>Every lock is recorded in the Windows Event Log under the <code>WindowsLocker</code> source.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="install">
+        <h2>Install in under a minute</h2>
+        <p class="lead">Download the latest release, extract, and run the installer. One UAC prompt, then you're done.</p>
+        <div class="steps">
+          <div class="step">
+            <div>
+              <h3>Download &amp; extract</h3>
+              <p>Grab <code>YubiKey-Locker-&lt;version&gt;-win-x64.zip</code> from the releases page and unzip it.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div>
+              <h3>Run the installer</h3>
+              <p>From the extracted folder, run the install script and approve the one-time elevation prompt.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div>
+              <h3>Pull your key to test</h3>
+              <p>Remove your YubiKey — the workstation locks immediately. It now runs on every boot.</p>
+            </div>
+          </div>
+        </div>
+        <pre><span class="code-comment"># from the extracted release folder</span>
+./install.ps1
+
+<span class="code-comment"># later, to remove</span>
+./uninstall.ps1</pre>
+      </section>
+
+      <section id="how" class="how">
+        <h2>How it works</h2>
+        <p>
+          A Windows service runs in Session 0 and can't lock your desktop directly,
+          so YubiKey Locker does it in two steps:
+        </p>
+        <ol>
+          <li>It subscribes to <strong>WMI PnP device-removal events</strong>, filtered to your key's USB vendor id (<code>1050</code> = Yubico).</li>
+          <li>On removal it resolves the console session's user token (<code>WTSQueryUserToken</code>) and launches <code>LockWorkStation</code> in that session via <code>CreateProcessAsUser</code>.</li>
+        </ol>
+        <p>
+          Duplicate events from a single unplug are de-bounced, and the lock is
+          fail-safe by design. Full details are in the
+          <a href="https://github.com/SpechtLabs/YubiKey-Locker#how-it-works">README</a>.
+        </p>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <div class="wrap footer-row">
+      <span>© 2026 SpechtLabs · Apache 2.0</span>
+      <span><a href="https://github.com/SpechtLabs/YubiKey-Locker">github.com/SpechtLabs/YubiKey-Locker</a></span>
+    </div>
+  </footer>
+</body>
+</html>

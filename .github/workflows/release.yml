@@ -1,0 +1,91 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Determine version
+        id: ver
+        shell: pwsh
+        run: |
+          $ref = "${{ github.ref_name }}"
+          # strip a leading "v" from tags like v1.2.3
+          $version = $ref -replace '^v', ''
+          if ($version -notmatch '^\d+\.\d+\.\d+') { $version = '0.0.0' }
+          "version=$version" >> $env:GITHUB_OUTPUT
+          "tag=$ref"         >> $env:GITHUB_OUTPUT
+          Write-Host "Version = $version (tag $ref)"
+
+      - name: Publish self-contained single-file exe
+        shell: pwsh
+        run: |
+          dotnet publish WindowsLocker.csproj `
+            -c Release `
+            -r win-x64 `
+            --self-contained true `
+            -p:PublishSingleFile=true `
+            -p:IncludeNativeLibrariesForSelfExtract=true `
+            -p:EnableCompressionInSingleFile=true `
+            -p:DebugType=none `
+            -p:Version=${{ steps.ver.outputs.version }} `
+            -o publish
+
+      - name: Stage release package
+        id: stage
+        shell: pwsh
+        run: |
+          $stage = "staging/WindowsLocker"
+          New-Item -ItemType Directory -Force -Path $stage | Out-Null
+          Copy-Item publish/WindowsLocker.exe $stage
+          Copy-Item WindowsLocker.ini        $stage
+          Copy-Item install.ps1              $stage
+          Copy-Item uninstall.ps1            $stage
+          Copy-Item README.md                $stage
+
+          $zip = "WindowsLocker-${{ steps.ver.outputs.tag }}-win-x64.zip"
+          Compress-Archive -Path "$stage/*" -DestinationPath $zip -Force
+          "zip=$zip" >> $env:GITHUB_OUTPUT
+          Write-Host "Packaged $zip"
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: WindowsLocker-win-x64
+          path: ${{ steps.stage.outputs.zip }}
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ steps.stage.outputs.zip }}
+          generate_release_notes: true
+          body: |
+            ## WindowsLocker ${{ steps.ver.outputs.tag }}
+
+            Self-contained build - **no .NET SDK or runtime required** on the target machine.
+
+            ### Install
+            1. Download and extract the zip below.
+            2. Right-click `install.ps1` > *Run with PowerShell*, or run `./install.ps1` in a terminal.
+            3. Approve the one-time UAC prompt.
+
+            The tool installs as an auto-start Windows service and locks your
+            workstation the moment your YubiKey is removed.
