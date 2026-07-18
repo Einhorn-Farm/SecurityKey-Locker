@@ -59,6 +59,8 @@ jobs:
           Copy-Item install.ps1                   $stage
           Copy-Item uninstall.ps1                 $stage
           Copy-Item README.md                     $stage
+          Copy-Item LICENSE                       $stage
+          Copy-Item THIRD-PARTY-NOTICES.txt       $stage
 
           $zip = "SecurityKey-Locker-${{ steps.ver.outputs.tag }}-win-x64.zip"
           Compress-Archive -Path "$stage/*" -DestinationPath $zip -Force
