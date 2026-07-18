@@ -3,7 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 
-namespace WindowsLocker
+namespace SecurityKeyLocker
 {
     /// <summary>
     /// Background worker: watches for removal of the configured security key
@@ -12,7 +12,7 @@ namespace WindowsLocker
     public sealed class LockerWorker : BackgroundService
     {
         // Ignore duplicate removal events fired for the same physical unplug
-        // (a single YubiKey exposes several PnP entities: HID, smartcard, FIDO...).
+        // (a single security key exposes several PnP entities: HID, smartcard, FIDO...).
         private static readonly TimeSpan DebounceWindow = TimeSpan.FromSeconds(3);
 
         private readonly object _lock = new object();

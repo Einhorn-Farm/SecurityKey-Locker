@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Runtime.InteropServices;
 
-namespace WindowsLocker
+namespace SecurityKeyLocker
 {
     /// <summary>
     /// Locks the interactive (console) desktop from a Session 0 service by

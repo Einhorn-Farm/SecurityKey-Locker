@@ -1,11 +1,11 @@
 #Requires -Version 5.1
 <#
-    Stops and removes the WindowsLocker service, its event log source and its
+    Stops and removes the SecurityKeyLocker service, its event log source and its
     installed files. Requires administrator rights (self-elevates).
 #>
 [CmdletBinding()]
 param(
-    [string]$InstallDir = (Join-Path $env:ProgramFiles 'WindowsLocker')
+    [string]$InstallDir = (Join-Path $env:ProgramFiles 'SecurityKeyLocker')
 )
 
 $ErrorActionPreference = 'Stop'
@@ -20,7 +20,7 @@ if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administra
     return
 }
 
-$svcName = 'WindowsLocker'
+$svcName = 'SecurityKeyLocker'
 
 if (Get-Service -Name $svcName -ErrorAction SilentlyContinue) {
     & sc.exe stop $svcName | Out-Null

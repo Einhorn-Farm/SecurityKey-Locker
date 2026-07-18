@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>YubiKey Locker — lock Windows when your key is removed</title>
-  <meta name="description" content="A tiny Windows service that locks your workstation the instant your YubiKey is unplugged. Install once, runs in the background, no runtime required." />
-  <meta property="og:title" content="YubiKey Locker" />
-  <meta property="og:description" content="Pull your YubiKey, and Windows locks. Install once, runs in the background." />
+  <title>SecurityKey Locker — lock Windows when your key is removed</title>
+  <meta name="description" content="A tiny Windows service that locks your workstation the instant your USB security key is unplugged. Install once, runs in the background, no runtime required." />
+  <meta property="og:title" content="SecurityKey Locker" />
+  <meta property="og:description" content="Pull your security key, and Windows locks. Install once, runs in the background." />
   <meta property="og:type" content="website" />
   <style>
     :root {
@@ -118,12 +118,12 @@
 <body>
   <header>
     <div class="wrap nav">
-      <div class="brand"><span class="mark">🔐</span> YubiKey Locker</div>
+      <div class="brand"><span class="mark">🔐</span> SecurityKey Locker</div>
       <nav class="nav-links">
         <a href="#features">Features</a>
         <a href="#install">Install</a>
         <a href="#how">How it works</a>
-        <a href="https://github.com/SpechtLabs/YubiKey-Locker">GitHub</a>
+        <a href="https://github.com/Einhorn-Farm/SecurityKey-Locker">GitHub</a>
       </nav>
     </div>
   </header>
@@ -135,11 +135,11 @@
         <h1>Pull your key. Windows locks.</h1>
         <p class="tagline">
           A tiny Windows service that locks your workstation the instant your
-          YubiKey is unplugged. No hotkey, no habit to remember.
+          USB security key is unplugged. No hotkey, no habit to remember.
         </p>
         <div class="cta">
-          <a class="btn btn-primary" href="https://github.com/SpechtLabs/YubiKey-Locker/releases/latest">⬇ Download for Windows</a>
-          <a class="btn btn-ghost" href="https://github.com/SpechtLabs/YubiKey-Locker">View on GitHub</a>
+          <a class="btn btn-primary" href="https://github.com/Einhorn-Farm/SecurityKey-Locker/releases/latest">⬇ Download for Windows</a>
+          <a class="btn btn-ghost" href="https://github.com/Einhorn-Farm/SecurityKey-Locker">View on GitHub</a>
         </div>
       </section>
 
@@ -168,7 +168,7 @@
           <div class="card">
             <div class="ico">🔧</div>
             <h3>Any security key</h3>
-            <p>Defaults to YubiKey (<code>VID 1050</code>), but any USB token works by vendor id.</p>
+            <p>Defaults to YubiKey (<code>VID 1050</code>), but any USB key or token works by vendor id.</p>
           </div>
           <div class="card">
             <div class="ico">🛡️</div>
@@ -178,7 +178,7 @@
           <div class="card">
             <div class="ico">📝</div>
             <h3>Observable</h3>
-            <p>Every lock is recorded in the Windows Event Log under the <code>WindowsLocker</code> source.</p>
+            <p>Every lock is recorded in the Windows Event Log under the <code>SecurityKeyLocker</code> source.</p>
           </div>
         </div>
       </section>
@@ -190,7 +190,7 @@
           <div class="step">
             <div>
               <h3>Download &amp; extract</h3>
-              <p>Grab <code>YubiKey-Locker-&lt;version&gt;-win-x64.zip</code> from the releases page and unzip it.</p>
+              <p>Grab <code>SecurityKey-Locker-&lt;version&gt;-win-x64.zip</code> from the releases page and unzip it.</p>
             </div>
           </div>
           <div class="step">
@@ -202,7 +202,7 @@
           <div class="step">
             <div>
               <h3>Pull your key to test</h3>
-              <p>Remove your YubiKey — the workstation locks immediately. It now runs on every boot.</p>
+              <p>Remove your security key — the workstation locks immediately. It now runs on every boot.</p>
             </div>
           </div>
         </div>
@@ -217,16 +217,16 @@
         <h2>How it works</h2>
         <p>
           A Windows service runs in Session 0 and can't lock your desktop directly,
-          so YubiKey Locker does it in two steps:
+          so SecurityKey Locker does it in two steps:
         </p>
         <ol>
-          <li>It subscribes to <strong>WMI PnP device-removal events</strong>, filtered to your key's USB vendor id (<code>1050</code> = Yubico).</li>
+          <li>It subscribes to <strong>WMI PnP device-removal events</strong>, filtered to your key's USB vendor id (<code>1050</code> = Yubico by default).</li>
           <li>On removal it resolves the console session's user token (<code>WTSQueryUserToken</code>) and launches <code>LockWorkStation</code> in that session via <code>CreateProcessAsUser</code>.</li>
         </ol>
         <p>
           Duplicate events from a single unplug are de-bounced, and the lock is
           fail-safe by design. Full details are in the
-          <a href="https://github.com/SpechtLabs/YubiKey-Locker#how-it-works">README</a>.
+          <a href="https://github.com/Einhorn-Farm/SecurityKey-Locker#how-it-works">README</a>.
         </p>
       </section>
     </div>
@@ -234,8 +234,8 @@
 
   <footer>
     <div class="wrap footer-row">
-      <span>© 2026 SpechtLabs · Apache 2.0</span>
-      <span><a href="https://github.com/SpechtLabs/YubiKey-Locker">github.com/SpechtLabs/YubiKey-Locker</a></span>
+      <span>© 2026 Einhorn-Farm · Apache 2.0</span>
+      <span><a href="https://github.com/Einhorn-Farm/SecurityKey-Locker">github.com/Einhorn-Farm/SecurityKey-Locker</a></span>
     </div>
   </footer>
 </body>

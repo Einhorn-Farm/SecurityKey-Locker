@@ -2,15 +2,15 @@ using System;
 using System.IO;
 using System.Reflection;
 
-namespace WindowsLocker
+namespace SecurityKeyLocker
 {
     /// <summary>
-    /// Loads settings from WindowsLocker.ini placed next to the executable.
-    /// Missing file or keys fall back to sensible defaults (YubiKey / Yubico).
+    /// Loads settings from SecurityKeyLocker.ini placed next to the executable.
+    /// Missing file or keys fall back to sensible defaults (matches any YubiKey).
     /// </summary>
     public sealed class AppConfig
     {
-        // Yubico USB vendor id (hex, without the "0x").
+        // USB vendor id (hex, without the "0x"). 1050 = Yubico by default.
         public string VendorId = "1050";
 
         // Optional product id (hex). Empty = match any device from the vendor.
@@ -22,7 +22,7 @@ namespace WindowsLocker
             try
             {
                 string dir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-                string path = Path.Combine(dir, "WindowsLocker.ini");
+                string path = Path.Combine(dir, "SecurityKeyLocker.ini");
                 if (!File.Exists(path))
                 {
                     return config;

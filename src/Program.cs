@@ -1,7 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-namespace WindowsLocker
+namespace SecurityKeyLocker
 {
     /// <summary>
     /// Entry point. Uses the .NET generic host with the Windows Service
@@ -17,7 +17,7 @@ namespace WindowsLocker
 
             builder.Services.AddWindowsService(options =>
             {
-                options.ServiceName = "WindowsLocker";
+                options.ServiceName = "SecurityKeyLocker";
             });
 
             builder.Services.AddHostedService<LockerWorker>();

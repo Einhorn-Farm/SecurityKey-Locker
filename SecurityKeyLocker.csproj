@@ -7,8 +7,8 @@
     <SelfContained>false</SelfContained>
     <Nullable>disable</Nullable>
     <ImplicitUsings>disable</ImplicitUsings>
-    <AssemblyName>WindowsLocker</AssemblyName>
-    <RootNamespace>WindowsLocker</RootNamespace>
+    <AssemblyName>SecurityKeyLocker</AssemblyName>
+    <RootNamespace>SecurityKeyLocker</RootNamespace>
     <!-- Service host: no window, ships as a plain exe -->
     <UseAppHost>true</UseAppHost>
   </PropertyGroup>
@@ -26,7 +26,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="WindowsLocker.ini" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="SecurityKeyLocker.ini" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

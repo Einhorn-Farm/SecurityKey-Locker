@@ -1,7 +1,7 @@
 using System;
 using System.Management;
 
-namespace WindowsLocker
+namespace SecurityKeyLocker
 {
     /// <summary>
     /// Subscribes to WMI PnP device-deletion events and raises a callback when a

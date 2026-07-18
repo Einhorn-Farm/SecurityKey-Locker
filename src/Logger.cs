@@ -1,7 +1,7 @@
 using System;
 using System.Diagnostics;
 
-namespace WindowsLocker
+namespace SecurityKeyLocker
 {
     /// <summary>
     /// Minimal logger that writes to the Windows Application event log (source
@@ -9,7 +9,7 @@ namespace WindowsLocker
     /// </summary>
     internal static class Logger
     {
-        private const string Source = "WindowsLocker";
+        private const string Source = "SecurityKeyLocker";
 
         public static void Info(string message)
         {

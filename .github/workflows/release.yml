@@ -37,7 +37,7 @@ jobs:
       - name: Publish self-contained single-file exe
         shell: pwsh
         run: |
-          dotnet publish WindowsLocker.csproj `
+          dotnet publish SecurityKeyLocker.csproj `
             -c Release `
             -r win-x64 `
             --self-contained true `
@@ -52,15 +52,15 @@ jobs:
         id: stage
         shell: pwsh
         run: |
-          $stage = "staging/WindowsLocker"
+          $stage = "staging/SecurityKeyLocker"
           New-Item -ItemType Directory -Force -Path $stage | Out-Null
-          Copy-Item publish/WindowsLocker.exe $stage
-          Copy-Item WindowsLocker.ini        $stage
-          Copy-Item install.ps1              $stage
-          Copy-Item uninstall.ps1            $stage
-          Copy-Item README.md                $stage
+          Copy-Item publish/SecurityKeyLocker.exe $stage
+          Copy-Item SecurityKeyLocker.ini         $stage
+          Copy-Item install.ps1                   $stage
+          Copy-Item uninstall.ps1                 $stage
+          Copy-Item README.md                     $stage
 
-          $zip = "WindowsLocker-${{ steps.ver.outputs.tag }}-win-x64.zip"
+          $zip = "SecurityKey-Locker-${{ steps.ver.outputs.tag }}-win-x64.zip"
           Compress-Archive -Path "$stage/*" -DestinationPath $zip -Force
           "zip=$zip" >> $env:GITHUB_OUTPUT
           Write-Host "Packaged $zip"
@@ -68,7 +68,7 @@ jobs:
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: WindowsLocker-win-x64
+          name: SecurityKey-Locker-win-x64
           path: ${{ steps.stage.outputs.zip }}
 
       - name: Create GitHub Release
@@ -78,7 +78,7 @@ jobs:
           files: ${{ steps.stage.outputs.zip }}
           generate_release_notes: true
           body: |
-            ## WindowsLocker ${{ steps.ver.outputs.tag }}
+            ## SecurityKey Locker ${{ steps.ver.outputs.tag }}
 
             Self-contained build - **no .NET SDK or runtime required** on the target machine.
 
@@ -88,4 +88,4 @@ jobs:
             3. Approve the one-time UAC prompt.
 
             The tool installs as an auto-start Windows service and locks your
-            workstation the moment your YubiKey is removed.
+            workstation the moment your USB security key is removed.

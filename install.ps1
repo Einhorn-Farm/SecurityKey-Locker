@@ -1,19 +1,19 @@
 #Requires -Version 5.1
 <#
-    Installs WindowsLocker as an auto-start Windows service running as
+    Installs SecurityKeyLocker as an auto-start Windows service running as
     LocalSystem. Requires administrator rights ONCE (for this install only);
     afterwards the service starts automatically at every boot with no prompt.
 
     Works in two layouts:
-      * Release  - WindowsLocker.exe sits next to this script (no SDK needed).
+      * Release  - SecurityKeyLocker.exe sits next to this script (no SDK needed).
       * Source   - no prebuilt exe; the script builds it with the .NET SDK.
 
-    Files are copied into %ProgramFiles%\WindowsLocker so the service keeps
+    Files are copied into %ProgramFiles%\SecurityKeyLocker so the service keeps
     working even if you delete the download/source folder.
 #>
 [CmdletBinding()]
 param(
-    [string]$InstallDir = (Join-Path $env:ProgramFiles 'WindowsLocker')
+    [string]$InstallDir = (Join-Path $env:ProgramFiles 'SecurityKeyLocker')
 )
 
 $ErrorActionPreference = 'Stop'
@@ -30,31 +30,31 @@ if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administra
 }
 
 $root    = Split-Path -Parent $MyInvocation.MyCommand.Path
-$svcName = 'WindowsLocker'
+$svcName = 'SecurityKeyLocker'
 
 # --- locate the executable to install ---
 $srcExe = $null
-if (Test-Path (Join-Path $root 'WindowsLocker.exe')) {
+if (Test-Path (Join-Path $root 'SecurityKeyLocker.exe')) {
     # Release layout: prebuilt exe next to the script.
-    $srcExe = Join-Path $root 'WindowsLocker.exe'
+    $srcExe = Join-Path $root 'SecurityKeyLocker.exe'
 }
-elseif (Test-Path (Join-Path $root 'publish\WindowsLocker.exe')) {
+elseif (Test-Path (Join-Path $root 'publish\SecurityKeyLocker.exe')) {
     # Already-built source layout.
-    $srcExe = Join-Path $root 'publish\WindowsLocker.exe'
+    $srcExe = Join-Path $root 'publish\SecurityKeyLocker.exe'
 }
 elseif (Test-Path (Join-Path $root 'build.ps1')) {
     # Source layout without a build yet: build it (needs the .NET SDK).
     Write-Host "No prebuilt executable found - building from source..."
     & (Join-Path $root 'build.ps1')
-    $srcExe = Join-Path $root 'publish\WindowsLocker.exe'
+    $srcExe = Join-Path $root 'publish\SecurityKeyLocker.exe'
 }
 if (-not $srcExe -or -not (Test-Path $srcExe)) {
-    throw "Could not find or build WindowsLocker.exe."
+    throw "Could not find or build SecurityKeyLocker.exe."
 }
 
 # --- locate the config file (optional) ---
 $srcIni = $null
-foreach ($candidate in @((Join-Path $root 'WindowsLocker.ini'), (Join-Path $root 'publish\WindowsLocker.ini'))) {
+foreach ($candidate in @((Join-Path $root 'SecurityKeyLocker.ini'), (Join-Path $root 'publish\SecurityKeyLocker.ini'))) {
     if (Test-Path $candidate) { $srcIni = $candidate; break }
 }
 
@@ -69,11 +69,11 @@ if (Get-Service -Name $svcName -ErrorAction SilentlyContinue) {
 
 # --- copy files into the stable install location ---
 New-Item -ItemType Directory -Force -Path $InstallDir | Out-Null
-$exePath = Join-Path $InstallDir 'WindowsLocker.exe'
+$exePath = Join-Path $InstallDir 'SecurityKeyLocker.exe'
 Copy-Item $srcExe $exePath -Force
 if ($srcIni) {
     # Don't clobber an existing user-edited config on reinstall.
-    $destIni = Join-Path $InstallDir 'WindowsLocker.ini'
+    $destIni = Join-Path $InstallDir 'SecurityKeyLocker.ini'
     if (-not (Test-Path $destIni)) { Copy-Item $srcIni $destIni -Force }
 }
 Write-Host "Installed files to $InstallDir"
@@ -86,10 +86,10 @@ if (-not [System.Diagnostics.EventLog]::SourceExists($svcName)) {
 
 # --- create service (LocalSystem = has SeTcbPrivilege needed to lock session) ---
 & sc.exe create $svcName binPath= "$exePath" start= auto obj= LocalSystem `
-    DisplayName= "Windows Locker (YubiKey)" | Out-Null
+    DisplayName= "Security Key Locker" | Out-Null
 if ($LASTEXITCODE -ne 0) { throw "sc.exe create failed (exit $LASTEXITCODE)." }
 
-& sc.exe description $svcName "Locks the workstation immediately when your YubiKey / security key is removed." | Out-Null
+& sc.exe description $svcName "Locks the workstation immediately when your USB security key is removed." | Out-Null
 
 # auto-restart the service if it ever crashes
 & sc.exe failure $svcName reset= 86400 actions= restart/5000/restart/5000/restart/5000 | Out-Null
@@ -98,6 +98,6 @@ if ($LASTEXITCODE -ne 0) { throw "sc.exe create failed (exit $LASTEXITCODE)." }
 if ($LASTEXITCODE -ne 0) { throw "sc.exe start failed (exit $LASTEXITCODE)." }
 
 Write-Host ""
-Write-Host "WindowsLocker installed and running." -ForegroundColor Green
+Write-Host "SecurityKeyLocker installed and running." -ForegroundColor Green
 Write-Host "It will now start automatically at every boot - no further prompts."
-Write-Host "Remove your YubiKey to test. Logs appear in Event Viewer > Windows Logs > Application (source 'WindowsLocker')."
+Write-Host "Remove your security key to test. Logs appear in Event Viewer > Windows Logs > Application (source 'SecurityKeyLocker')."
