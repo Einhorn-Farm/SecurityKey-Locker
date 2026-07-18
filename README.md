@@ -2,7 +2,7 @@
 
 [![Release](https://github.com/Einhorn-Farm/SecurityKey-Locker/actions/workflows/release.yml/badge.svg)](https://github.com/Einhorn-Farm/SecurityKey-Locker/actions/workflows/release.yml)
 [![Latest release](https://img.shields.io/github/v/release/Einhorn-Farm/SecurityKey-Locker?sort=semver)](https://github.com/Einhorn-Farm/SecurityKey-Locker/releases)
-[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](./LICENSE)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Windows%20x64-0078D6.svg)](#requirements)
 
 > Pull your security key, and Windows locks. No hotkey, no habit to remember, no thinking about it.
@@ -90,4 +90,4 @@ git push origin v1.0.0
 
 ## License
 
-Apache 2.0. See [LICENSE](./LICENSE).
+MIT. See [LICENSE](./LICENSE).
