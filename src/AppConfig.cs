@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Reflection;
 
 namespace SecurityKeyLocker
 {
@@ -21,7 +20,10 @@ namespace SecurityKeyLocker
             var config = new AppConfig();
             try
             {
-                string dir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                // AppContext.BaseDirectory works correctly for both normal and
+                // single-file/self-contained deployments; Assembly.Location does
+                // not (it returns an empty string when embedded in a single file).
+                string dir = AppContext.BaseDirectory;
                 string path = Path.Combine(dir, "SecurityKeyLocker.ini");
                 if (!File.Exists(path))
                 {
