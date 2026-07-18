@@ -69,8 +69,35 @@ if (Get-Service -Name $svcName -ErrorAction SilentlyContinue) {
 
 # --- copy files into the stable install location ---
 New-Item -ItemType Directory -Force -Path $InstallDir | Out-Null
+
+# Clear stale files from a previous version/install (keep the user's config).
+# The service was stopped/deleted above, so its files are no longer locked.
+Get-ChildItem -Path $InstallDir -File -ErrorAction SilentlyContinue |
+    Where-Object { $_.Name -ne 'SecurityKeyLocker.ini' } |
+    Remove-Item -Force -ErrorAction SilentlyContinue
+
 $exePath = Join-Path $InstallDir 'SecurityKeyLocker.exe'
-Copy-Item $srcExe $exePath -Force
+$srcDir  = Split-Path -Parent $srcExe
+
+# A framework-dependent build is a launcher exe plus companion runtime files
+# (.dll, .deps.json, .runtimeconfig.json, dependencies). A self-contained
+# single-file release is just the exe. Copy the whole payload so both work.
+if ((Split-Path -Leaf $srcDir) -ieq 'publish') {
+    # Full published output: copy everything except the config (handled below).
+    Get-ChildItem -Path $srcDir -File | Where-Object { $_.Extension -ne '.ini' } |
+        ForEach-Object { Copy-Item $_.FullName (Join-Path $InstallDir $_.Name) -Force }
+} else {
+    # Release layout (exe next to script). Copy the exe plus any runtime
+    # companions that happen to sit beside it (none for single-file builds).
+    Copy-Item $srcExe $exePath -Force
+    foreach ($name in 'SecurityKeyLocker.dll','SecurityKeyLocker.deps.json','SecurityKeyLocker.runtimeconfig.json') {
+        $companion = Join-Path $srcDir $name
+        if (Test-Path $companion) { Copy-Item $companion (Join-Path $InstallDir $name) -Force }
+    }
+}
+
+if (-not (Test-Path $exePath)) { throw "Executable was not copied to $exePath." }
+
 if ($srcIni) {
     # Don't clobber an existing user-edited config on reinstall.
     $destIni = Join-Path $InstallDir 'SecurityKeyLocker.ini'
